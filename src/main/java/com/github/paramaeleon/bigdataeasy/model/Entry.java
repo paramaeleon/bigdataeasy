@@ -5,6 +5,7 @@
 package com.github.paramaeleon.bigdataeasy.model;
 
 import java.util.*;
+import java.util.stream.*;
 
 import javax.annotation.*;
 
@@ -16,6 +17,15 @@ import org.apache.commons.lang3.tuple.*;
  * @author Matthias Ronge ‹matthias.ronge@freenet.de›
  */
 public interface Entry {
+    /**
+     * Provides access to the {@code rdfs:ContainerMembershipProperty}. This is
+     * a filtered view of the entries referenced as ordered list entries.
+     *
+     * @return
+     * @see "https://www.w3.org/TR/rdf-schema/#ch_containermembershipproperty"
+     */
+    ContainerMembershipPropertyView containerMembershipProperty();
+
     /**
      * Tests whether an element is directly referenced from this entry.
      *
@@ -45,11 +55,47 @@ public interface Entry {
     boolean containsKey(String identifier);
 
     /**
-     * Provides the entries of this Node for iteration.
+     * Returns all entries in this entry. Returns a set, that means, multiple
+     * linked entries are returned only once, and there is no order.
      *
-     * @return the edges
+     * @return all entries in this entry
      */
-    Collection<Pair<String, Collection<Entry>>> entries();
+    default Collection<Entry> elements() {
+        return entriesStream().flatMap(λ -> λ.getValue().parallelStream()).collect(Collectors.toSet());
+    }
+
+    /**
+     * Provides the entries of this node as stream grouped by relation.
+     *
+     * @return the entries node as stream
+     * @throws StackOverflowError if the underlying implementation does neither
+     *                            implement {@code entriesStream()} nor
+     *                            {@code entryStream()}. If reasonable, the
+     *                            underlying implementation should implement
+     *                            {@code entriesStream()}, and there is nothing
+     *                            wrong with implementing both.
+     */
+    default Stream<Pair<String, Collection<Entry>>> entriesStream() {
+        Map<String, Collection<Entry>> collector = new HashMap<>();
+        entryStream()
+                .forEachOrdered(λ -> collector.computeIfAbsent(λ.getKey(), μ -> new LinkedList<>()).add(λ.getValue()));
+        return collector.entrySet().parallelStream().map(λ -> Pair.of(λ.getKey(), λ.getValue()));
+    }
+
+    /**
+     * Provides the entries of this node as stream one by one.
+     *
+     * @return the entries node as stream
+     * @throws StackOverflowError if the underlying implementation does neither
+     *                            implement {@code entriesStream()} nor
+     *                            {@code entryStream()}. If reasonable, the
+     *                            underlying implementation should implement
+     *                            {@code entriesStream()}, and there is nothing
+     *                            wrong with implementing both.
+     */
+    default Stream<Pair<String, Entry>> entryStream() {
+        return entriesStream().flatMap(λ -> λ.getRight().parallelStream().map(μ -> Pair.of(λ.getLeft(), μ)));
+    }
 
     /**
      * Returns all entries referenced by the given relation.
@@ -64,10 +110,8 @@ public interface Entry {
     /**
      * Gets all nodes referenced by relation which have a certain type.
      *
-     * @param relation
-     *            relation to look up
-     * @param type
-     *            node type to filter by
+     * @param relation relation to look up
+     * @param type     node type to filter by
      * @return the nodes
      */
     default Collection<Entry> get(Entry relation, Entry type) {
@@ -146,7 +190,7 @@ public interface Entry {
 
     /**
      * Returns the identifier of this entry.
-     * 
+     *
      * @return the identifier of this entry
      */
     @CheckForNull
@@ -183,7 +227,7 @@ public interface Entry {
 
     /**
      * Returns all types of this entry.
-     * 
+     *
      * @return all types of this entry
      */
     Collection<String> getTypes();
@@ -218,7 +262,7 @@ public interface Entry {
 
     /**
      * Returns whether this entry is anonymous.
-     * 
+     *
      * @return whether this entry is anonymous
      */
     default boolean isAnonymous() { return !isNamed(); }
@@ -232,35 +276,35 @@ public interface Entry {
 
     /**
      * Returns whether this entry is a language-tagged string.
-     * 
+     *
      * @return whether this entry is a language-tagged string
      */
     boolean isLangString();
 
     /**
      * Returns whether this entry is a leaf.
-     * 
+     *
      * @return whether this entry is a leaf
      */
     boolean isLeaf();
 
     /**
      * Returns whether this entry is a literal.
-     * 
+     *
      * @return whether this entry is a literal
      */
     boolean isLiteral();
 
     /**
      * Returns whether this entry is named.
-     * 
+     *
      * @return whether this entry is named
      */
     default boolean isNamed() { return getIdentifier() != null; }
 
     /**
      * Returns whether this entry is a node.
-     * 
+     *
      * @return whether this entry is a node
      */
     default boolean isNode() { return !isLiteral(); }
@@ -280,10 +324,8 @@ public interface Entry {
     /**
      * Adds a literal by relation.
      *
-     * @param relation
-     *            Relation the object shall be added under
-     * @param object
-     *            object to add
+     * @param relation Relation the object shall be added under
+     * @param object   object to add
      * @return this, for method chaining
      */
     default Entry put(Entry relation, String object) {
@@ -315,10 +357,8 @@ public interface Entry {
     /**
      * Adds all of the objects by the given relation.
      *
-     * @param relation
-     *            relation to add the objects on
-     * @param objects
-     *            objects to add
+     * @param relation relation to add the objects on
+     * @param objects  objects to add
      */
     default void putAll(Entry relation, Collection<? extends Entry> objects) {
         putAll(relation.getIdentifier(), objects);
@@ -344,8 +384,7 @@ public interface Entry {
     /**
      * Removes all objects linked by the given relation.
      *
-     * @param relation
-     *            relation to remove
+     * @param relation relation to remove
      * @return the previously linked objects
      */
     default Collection<Entry> removeAll(Entry relation) {
@@ -368,7 +407,7 @@ public interface Entry {
      * @param objects  new objects for this relation
      * @return the objects previously related
      */
-    default Collection<Entry> replaceAll(Entry relation, Collection<Entry> objects){
+    default Collection<Entry> replaceAll(Entry relation, Collection<Entry> objects) {
         return replaceAll(relation.getIdentifier(), objects);
     }
 
@@ -402,7 +441,7 @@ public interface Entry {
      * @param object   new object for this relation
      * @return the objects previously related
      */
-    default Collection<Entry> replaceAll(String relation, Entry object){
+    default Collection<Entry> replaceAll(String relation, Entry object) {
         return replaceAll(relation, Collections.singleton(object));
     }
 
