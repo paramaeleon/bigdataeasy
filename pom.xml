@@ -1,0 +1,131 @@
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>   <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.paramaeleon</groupId>
+    <artifactId>paramaeleon-bigdataeasy</artifactId>
+    <name>Paramaeleon Big Data Easy</name>
+
+    <description>
+        All the big ones do it: Big Data, also known as Semantic Web, Resource
+        Description Framework (RDF), Resource Description Architecture (RDA),
+        or Linked Data / Linked Open Data (LOD). The remainder, however, manage
+        their data in spreadsheets, or uses rigid software solutions to manage
+        it. The former never have a homogenous structure (even if they make an
+        effort), and are quickly getting the famous “spreadsheet chaos”. The
+        latter are always behind reality, and there is always a lack of a way
+        to deal with a particular case, because their software has a too rigid
+        structure that does not dynamically adapt to reality. It’s a fact that
+        there is barely nothing that does NOT exist. Big Data takes this
+        primary clue into account from the beginning, and that’s what makes
+        those who use it so much better. Drawback: The handling of these
+        frameworks felt so far unnecessarily complicated. One might get the
+        impression that only seven people around the world have understood how
+        this works. Big Data Easy has appeared to cure this shortcoming.
+    </description>
+
+    <version>0.0.1</version>
+
+    <developers>
+        <developer>
+            <name>Matthias Ronge</name>
+            <url>https://github.com/paramaeleon</url>
+            <email>matthias.ronge@freenet.de</email>
+            <roles><role>https://dbpedia.org/ontology/developer</role></roles>
+            <timezone>Europe/Berlin</timezone>
+       </developer>
+    </developers>
+
+    <dependencies>
+        <!-- compile-only dependencies -->
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- compile & run dependencies -->
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena-libs</artifactId>
+            <version>3.10.0</version>
+            <type>pom</type>
+        </dependency>
+
+        <!-- test dependencies -->
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>8</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                </configuration>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
